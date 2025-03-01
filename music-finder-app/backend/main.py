@@ -6,7 +6,7 @@ import httpx
 import os
 from dotenv import load_dotenv
 import json
-from playlist_algorithm import create_dj_playlist
+from playlist_algorithm import create_dj_playlist, analyze_playlist_energy
 
 # Load environment variables
 load_dotenv()
@@ -74,7 +74,7 @@ async def search_tracks(query: str):
 
 @app.post("/api/create-playlist")
 async def generate_playlist(request: PlaylistRequest):
-    """Generate a DJ playlist based on seed tracks"""
+    """Generate a DJ playlist based on seed tracks with focus on musical elements"""
     try:
         # Get track details for each seed track
         track_details = []
@@ -96,9 +96,42 @@ async def generate_playlist(request: PlaylistRequest):
             transition_style=request.transition_style
         )
         
+        # Add energy analysis to the playlist
+        energy_analysis = analyze_playlist_energy(playlist)
+        playlist["energy_analysis"] = energy_analysis
+        
         return playlist
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating playlist: {str(e)}")
+
+@app.get("/api/audio-features")
+async def get_audio_features(track_id: str):
+    """
+    Get audio features for a track
+    This is a placeholder endpoint - in a real implementation, this would
+    connect to an audio analysis service or use local audio analysis
+    """
+    try:
+        # In a real implementation, this would perform audio analysis
+        # or call a service like Spotify's audio features API
+        
+        # For now, we'll return placeholder data
+        import random
+        
+        features = {
+            "track_id": track_id,
+            "energy": random.uniform(0, 1),
+            "danceability": random.uniform(0, 1),
+            "acousticness": random.uniform(0, 1),
+            "instrumentalness": random.uniform(0, 1),
+            "valence": random.uniform(0, 1),
+            "tempo": random.randint(70, 180),
+            "key": random.choice(["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"])
+        }
+        
+        return features
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting audio features: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

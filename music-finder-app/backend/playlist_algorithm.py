@@ -7,23 +7,89 @@ import pandas as pd
 def extract_track_features(track: Dict[Any, Any]) -> Dict[str, float]:
     """
     Extract relevant features from a track for playlist creation
+    Focusing on musical elements and ignoring popularity metrics
     """
+    # Get BPM from track metadata or estimate it if not available
+    bpm = track.get("bpm", 0)
+    if bpm == 0:
+        # In a real implementation, we would use audio analysis to estimate BPM
+        bpm = random.randint(90, 140)  # Placeholder with reasonable range
+    
+    # Extract or generate musical features
     features = {
-        "duration": track.get("duration", 0) / 1000,  # Convert to seconds
-        "bpm": track.get("bpm", 0),
-        "playback_count": track.get("playback_count", 0),
-        "likes_count": track.get("likes_count", 0),
-        "genre": track.get("genre", ""),
-        "created_at": track.get("created_at", ""),
+        "bpm": bpm,
         "key": track.get("key", ""),
-        "energy": random.uniform(0, 1),  # Placeholder for energy (would come from audio analysis)
+        # In a real implementation, these would come from audio analysis
+        "energy": random.uniform(0, 1),  # Placeholder for energy level
         "danceability": random.uniform(0, 1),  # Placeholder for danceability
+        "acousticness": random.uniform(0, 1),  # Placeholder for acoustic quality
+        "instrumentalness": random.uniform(0, 1),  # Placeholder for instrumental vs vocal
+        "valence": random.uniform(0, 1),  # Placeholder for musical positiveness
     }
     
-    # Add more sophisticated feature extraction here
-    # In a real implementation, you might use audio analysis APIs or ML models
+    # Create a sonic signature for the track (would be derived from audio analysis)
+    # This helps group tracks with similar sound qualities
+    features["sonic_signature"] = (
+        features["energy"] * 0.3 + 
+        features["danceability"] * 0.3 + 
+        features["acousticness"] * 0.2 + 
+        features["instrumentalness"] * 0.1 + 
+        features["valence"] * 0.1
+    )
+    
+    # Classify into pseudo-genre clusters based on sonic signature
+    # In a real implementation, this would use machine learning
+    if features["sonic_signature"] < 0.3:
+        features["sonic_cluster"] = "ambient"
+    elif features["sonic_signature"] < 0.5:
+        features["sonic_cluster"] = "downtempo"
+    elif features["sonic_signature"] < 0.7:
+        features["sonic_cluster"] = "groovy"
+    else:
+        features["sonic_cluster"] = "energetic"
     
     return features
+
+def calculate_key_compatibility(key1: str, key2: str) -> float:
+    """
+    Calculate musical key compatibility based on the circle of fifths
+    Higher score means better harmonic transition
+    
+    In a real implementation, this would include full circle of fifths
+    and relative major/minor relationships
+    """
+    if not key1 or not key2:
+        return 0.5  # Unknown keys get medium compatibility
+    
+    if key1 == key2:
+        return 1.0  # Perfect match
+    
+    # Simple circle of fifths relationship (highly simplified)
+    # In a real implementation, this would be a complete mapping
+    circle_of_fifths = {
+        "C": ["G", "F", "Am"],
+        "G": ["D", "C", "Em"],
+        "D": ["A", "G", "Bm"],
+        "A": ["E", "D", "F#m"],
+        "E": ["B", "A", "C#m"],
+        "B": ["F#", "E", "G#m"],
+        "F#": ["C#", "B", "D#m"],
+        "C#": ["G#", "F#", "A#m"],
+        "G#": ["D#", "C#", "Fm"],
+        "D#": ["A#", "G#", "Cm"],
+        "A#": ["F", "D#", "Gm"],
+        "F": ["C", "A#", "Dm"],
+        # Add minor keys and their relationships
+        "Am": ["Em", "Dm", "C"],
+        "Em": ["Bm", "Am", "G"],
+        # ... and so on
+    }
+    
+    # Check if keys are adjacent on the circle of fifths
+    if key2 in circle_of_fifths.get(key1, []):
+        return 0.8  # Good compatibility
+    
+    return 0.3  # Poor compatibility
 
 def calculate_transition_score(track1: Dict[str, float], track2: Dict[str, float], style: str) -> float:
     """
@@ -33,41 +99,48 @@ def calculate_transition_score(track1: Dict[str, float], track2: Dict[str, float
     # Base weights for different transition styles
     if style == "smooth":
         weights = {
-            "bpm_diff": -0.5,
-            "key_compatibility": 0.3,
-            "energy_diff": -0.3,
-            "danceability_diff": -0.2,
+            "bpm_diff": -1.2,  # Higher weight on BPM for smooth transitions
+            "key_compatibility": 1.5,  # Higher weight on key compatibility
+            "energy_diff": -0.7,
+            "sonic_cluster": 0.8,  # Similar sonic qualities
         }
     elif style == "energetic":
         weights = {
-            "bpm_diff": -0.2,
-            "key_compatibility": 0.1,
-            "energy_diff": 0.3,  # Positive weight for energy changes
-            "danceability_diff": 0.2,
+            "bpm_diff": -0.5,  # Less penalty for BPM differences
+            "key_compatibility": 0.8,
+            "energy_diff": 0.6,  # Positive weight for energy changes (encourages contrast)
+            "sonic_cluster": 0.4,
         }
     else:  # minimal
         weights = {
-            "bpm_diff": -0.7,
-            "key_compatibility": 0.4,
-            "energy_diff": -0.4,
-            "danceability_diff": -0.3,
+            "bpm_diff": -1.5,  # Strongest penalty for BPM differences
+            "key_compatibility": 1.2,
+            "energy_diff": -1.0,  # Strong penalty for energy differences
+            "sonic_cluster": 1.0,  # Very important to keep sonic quality consistent
         }
     
-    # Calculate differences
+    # Calculate differences and compatibility scores
     bpm_diff = abs(track1.get("bpm", 0) - track2.get("bpm", 0))
     energy_diff = abs(track1.get("energy", 0) - track2.get("energy", 0))
-    danceability_diff = abs(track1.get("danceability", 0) - track2.get("danceability", 0))
     
-    # Simple key compatibility (placeholder - would be more sophisticated in real implementation)
-    # In reality, this would use music theory to determine key compatibility
-    key_compatibility = 1.0 if track1.get("key", "") == track2.get("key", "") else 0.5
+    # Calculate key compatibility using musical theory
+    key_compatibility = calculate_key_compatibility(
+        track1.get("key", ""), 
+        track2.get("key", "")
+    )
+    
+    # Sonic cluster compatibility (1.0 if same cluster, 0.5 if different)
+    sonic_cluster_score = 1.0 if track1.get("sonic_cluster") == track2.get("sonic_cluster") else 0.5
+    
+    # Normalize BPM difference (0-50 range is typical for DJ transitions)
+    normalized_bpm_diff = min(bpm_diff / 50.0, 1.0)
     
     # Calculate weighted score
     score = (
-        weights["bpm_diff"] * bpm_diff +
+        weights["bpm_diff"] * normalized_bpm_diff +
         weights["key_compatibility"] * key_compatibility +
         weights["energy_diff"] * energy_diff +
-        weights["danceability_diff"] * danceability_diff
+        weights["sonic_cluster"] * sonic_cluster_score
     )
     
     return score
@@ -99,7 +172,7 @@ def create_dj_playlist(
     
     # Start with the first seed track
     playlist_tracks = [tracks_with_features[0]["track"]]
-    current_duration = tracks_with_features[0]["features"]["duration"]
+    current_duration = tracks_with_features[0]["track"].get("duration", 0) / 1000  # Convert to seconds
     target_duration_seconds = duration_minutes * 60
     
     # Create a pool of potential tracks (in a real app, this would come from SoundCloud API)
@@ -134,7 +207,7 @@ def create_dj_playlist(
         # Add the best track to the playlist
         best_track_data = transition_scores[0][0]
         playlist_tracks.append(best_track_data["track"])
-        current_duration += best_track_data["features"]["duration"]
+        current_duration += best_track_data["track"].get("duration", 0) / 1000
     
     # Create the final playlist object
     playlist = {
@@ -161,7 +234,9 @@ def analyze_playlist_energy(playlist: Dict[str, Any]) -> Dict[str, Any]:
             "title": track.get("title", "Unknown"),
             "energy": features["energy"],
             "danceability": features["danceability"],
-            "bpm": features["bpm"]
+            "bpm": features["bpm"],
+            "key": features.get("key", "Unknown"),
+            "sonic_cluster": features.get("sonic_cluster", "Unknown")
         })
     
     # Calculate energy flow statistics

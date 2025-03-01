@@ -1,0 +1,80 @@
+{
+  "name": "DJ Mix - Deep House Groove",
+  "tracks": [
+    {
+      "id": "track_1",
+      "title": "Deep House Groove",
+      "user": {
+        "username": "DJ Producer"
+      },
+      "duration": 240000,
+      "permalink_url": "https://soundcloud.com/example/deep-house",
+      "artwork_url": "https://example.com/artwork1.jpg",
+      "genre": "Deep House",
+      "bpm": 124,
+      "key": "Am"
+    },
+    {
+      "id": "track_3",
+      "title": "Progressive Journey",
+      "user": {
+        "username": "ProgressiveMaster"
+      },
+      "duration": 420000,
+      "permalink_url": "https://soundcloud.com/example/progressive",
+      "artwork_url": "https://example.com/artwork3.jpg",
+      "genre": "Progressive House",
+      "bpm": 128,
+      "key": "C"
+    },
+    {
+      "id": "track_2",
+      "title": "Tech House Beat",
+      "user": {
+        "username": "TechDJ"
+      },
+      "duration": 300000,
+      "permalink_url": "https://soundcloud.com/example/tech-house",
+      "artwork_url": "https://example.com/artwork2.jpg",
+      "genre": "Tech House",
+      "bpm": 126,
+      "key": "G"
+    }
+  ],
+  "duration_seconds": 960.0,
+  "transition_style": "minimal",
+  "track_count": 3,
+  "energy_analysis": {
+    "energy_profile": [
+      {
+        "title": "Deep House Groove",
+        "energy": 0.25425764938561646,
+        "danceability": 0.9247502022747923,
+        "bpm": 124,
+        "key": "Am",
+        "sonic_cluster": "groovy"
+      },
+      {
+        "title": "Progressive Journey",
+        "energy": 0.4955132900047028,
+        "danceability": 0.4323370362500637,
+        "bpm": 128,
+        "key": "C",
+        "sonic_cluster": "downtempo"
+      },
+      {
+        "title": "Tech House Beat",
+        "energy": 0.2151908301541957,
+        "danceability": 0.35330029129198126,
+        "bpm": 126,
+        "key": "G",
+        "sonic_cluster": "downtempo"
+      }
+    ],
+    "avg_energy": 0.321653923181505,
+    "energy_variance": 0.015367909110225043,
+    "avg_energy_change": 0.2607890502347967,
+    "max_energy": 0.4955132900047028,
+    "min_energy": 0.2151908301541957
+  }
+}
